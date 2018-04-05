@@ -153,6 +153,30 @@ module Ontraport
     objects_call :delete, object_type, endpoint: '/objects/tag', data: params
   end
 
+  # Add a subscription to an object.
+  #
+  # @example
+  #   Ontraport.add_subscription :contact, 12345, [150,200], "Campaign", { range: 5 }
+  #   #=> #<Ontraport::Response @data=...>
+  #
+  # @see https://api.ontraport.com/live/#!/objects/addSubscription API docs
+  #
+  # @param object_type [Symbol] the type of object
+  # @param id [Array, Integer] id or array of ids of objects to subscribe
+  # @param add_list [Array, Integer] id or array of ids of Campaigns or Sequences to subscribe the object to
+  # @param sub_type [String, nil] possible values are "Sequence" or "Campaign" defaults to "Campaign"
+  # @param params [Hash, nil] extra stuff to add to request data. Use +.describe+ to get a list of available fields.
+  # @return [Response]
+
+  def self.add_subscription object_type, id, add_list, sub_type = 'Campaign', params = {}
+    objects_call :put, object_type, endpoint: '/objects/subscribe',
+                                    data: params.update(
+                                      id: Array(id),
+                                      sub_type: sub_type,
+                                      add_list: Array(add_list)
+                                    )
+  end
+
   # @!endgroup
   # @!group "Transactions" Methods
 
@@ -165,8 +189,6 @@ module Ontraport
   def self.get_order order_id
     request_with_authentication :get, endpoint: '/transaction/order', data: { id: order_id }
   end
-
-  # @!endgroup
 
   private
     def self.request_with_authentication method, endpoint:, data: nil

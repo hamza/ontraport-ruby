@@ -1,5 +1,5 @@
-lib/ontraport.rb b594b805dde3c592fd7cbad36b2c4669b73b26e7
-lib/ontraport/version.rb 91989823b1c7e27b077df5cbfa78e912fd7e9400
+lib/ontraport.rb 4e92e3ae03dce3b011de79fc98f6378112acf67d
+lib/ontraport/version.rb 65d06275f9c937d20387da033fb820edc859f319
 lib/ontraport/response.rb a6560cd7c27414b42d2070db67f466f8e1be050e
 lib/ontraport/exceptions.rb 2847613063c8f69f5c22a2a19b8e445b66075729
 lib/ontraport/configuration.rb c0cecf8a66acf72e84d7c97e89f602a92a6f8f21
