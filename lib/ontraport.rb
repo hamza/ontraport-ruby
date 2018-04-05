@@ -171,9 +171,9 @@ module Ontraport
   def self.add_subscription object_type, ids, add_list, sub_type = 'Campaign', params = {}
     objects_call :put, object_type, endpoint: '/objects/subscribe',
                                     data: params.update(
-                                      ids: Array(ids),
+                                      ids: Array(ids).join(','),
                                       sub_type: sub_type,
-                                      add_list: Array(add_list)
+                                      add_list: Array(add_list).join(',')
                                     )
   end
 
