@@ -1,3 +1,3 @@
 module Ontraport
-  VERSION = '0.1.21'
+  VERSION = '0.1.3'
 end

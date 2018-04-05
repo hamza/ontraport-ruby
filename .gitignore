@@ -3,3 +3,4 @@ ontraport.sublime-workspace
 *.gem
 /doc/*
 .idea
+.ruby-version
