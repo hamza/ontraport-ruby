@@ -190,6 +190,9 @@ module Ontraport
     request_with_authentication :get, endpoint: '/transaction/order', data: { id: order_id }
   end
 
+  # @!endgroup
+  # 
+
   private
     def self.request_with_authentication method, endpoint:, data: nil
       data_param = method.eql?(:get) ? :query : :body
