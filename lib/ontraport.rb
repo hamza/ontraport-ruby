@@ -210,7 +210,11 @@ module Ontraport
         raise APIError.new(response.body.present? ? "#{error} - #{response.body}" : error)
       end
 
-      Response.new **response.parsed_response.symbolize_keys
+      parsed_response = response.parsed_response
+
+      @configuration.debug_mode ? parsed_response.update(original_response: response.request) : nil
+
+      Response.new **parsed_response.symbolize_keys
     end
 
     def self.objects_call method, object_type, endpoint:, data: {}

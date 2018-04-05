@@ -58,7 +58,12 @@ module Ontraport
     #   Numeric object identifier for a particular object in the schema.
     #
     #   @return [String]
-    attr_reader :code, :data, :updates, :notifications, :account_id, :misc, :name, :fields, :schema_object_id
+    #
+    # @!attribute [r] original_request
+    #   Original HTTParty request only present when debug mode is enabled in config
+    #
+    #   @return [HTTParty::Request, nil] the original request for debugging
+    attr_reader :code, :data, :updates, :notifications, :account_id, :misc, :name, :fields, :schema_object_id, :original_request
 
     def initialize args
       args.each do |key,val|

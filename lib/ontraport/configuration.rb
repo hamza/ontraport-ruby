@@ -13,6 +13,9 @@ module Ontraport
   #   Ontraport.configure do |config|
   #     config.api_id = 'foo'
   #     config.api_key = 'bar'
+  #     if Rails.env.development?
+  #       config.debug_mode = true
+  #     end
   #   end
   #
   # @return [nil]
@@ -23,6 +26,9 @@ module Ontraport
 
   # The Gem's configuration
   class Configuration
-    attr_accessor :api_id, :api_key
+    attr_accessor :api_id, :api_key, :debug_mode
+    def initialize
+      @debug_mode ||= false
+    end
   end
 end
