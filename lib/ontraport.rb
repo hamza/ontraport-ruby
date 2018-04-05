@@ -162,16 +162,16 @@ module Ontraport
   # @see https://api.ontraport.com/live/#!/objects/addSubscription API docs
   #
   # @param object_type [Symbol] the type of object
-  # @param id [Array, Integer] id or array of ids of objects to subscribe
+  # @param ids [Array, Integer] id or array of ids of objects to subscribe
   # @param add_list [Array, Integer] id or array of ids of Campaigns or Sequences to subscribe the object to
   # @param sub_type [String, nil] possible values are "Sequence" or "Campaign" defaults to "Campaign"
   # @param params [Hash, nil] extra stuff to add to request data. Use +.describe+ to get a list of available fields.
   # @return [Response]
 
-  def self.add_subscription object_type, id, add_list, sub_type = 'Campaign', params = {}
+  def self.add_subscription object_type, ids, add_list, sub_type = 'Campaign', params = {}
     objects_call :put, object_type, endpoint: '/objects/subscribe',
                                     data: params.update(
-                                      id: Array(id),
+                                      ids: Array(ids),
                                       sub_type: sub_type,
                                       add_list: Array(add_list)
                                     )
@@ -191,7 +191,7 @@ module Ontraport
   end
 
   # @!endgroup
-  # 
+  #
 
   private
     def self.request_with_authentication method, endpoint:, data: nil
