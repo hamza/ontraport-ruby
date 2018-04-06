@@ -212,7 +212,7 @@ module Ontraport
 
       parsed_response = response.parsed_response
 
-      @configuration.debug_mode ? parsed_response.update(original_response: response.request) : nil
+      @configuration.debug_mode ? parsed_response.update(original_request: response.request) : nil
 
       Response.new **parsed_response.symbolize_keys
     end
