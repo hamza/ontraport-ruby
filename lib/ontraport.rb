@@ -177,6 +177,30 @@ module Ontraport
                                     )
   end
 
+  # Remove a subscription from an object.
+  #
+  # @example
+  #   Ontraport.remove_subscription :contact, 12345, [150,200], "Campaign", { range: 5 }
+  #   #=> #<Ontraport::Response @data=...>
+  #
+  # @see https://api.ontraport.com/live/#!/objects/addSubscription API docs
+  #
+  # @param object_type [Symbol] the type of object
+  # @param ids [Array, Integer] id or array of ids of objects to subscribe
+  # @param remove_list [Array, Integer] id or array of ids of Campaigns or Sequences to unsubscribe the object to
+  # @param sub_type [String, nil] possible values are "Sequence" or "Campaign" defaults to "Campaign"
+  # @param params [Hash, nil] extra stuff to add to request data. Use +.describe+ to get a list of available fields.
+  # @return [Response]
+
+  def self.remove_subscription object_type, ids, remove_list, sub_type = 'Campaign', params = {}
+    objects_call :delete, object_type, endpoint: '/objects/subscribe',
+                                       data: params.update(
+                                         ids: Array(ids).join(','),
+                                         sub_type: sub_type,
+                                         remove_list: Array(remove_list).join(',')
+                                       )
+  end
+
   # @!endgroup
   # @!group "Transactions" Methods
 
