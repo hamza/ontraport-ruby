@@ -194,37 +194,41 @@ module Ontraport
   #
 
   private
-    def self.request_with_authentication method, endpoint:, data: nil
-      data_param = method.eql?(:get) ? :query : :body
 
-      args = [method, "#{BASE_URL}#{API_VERSION}#{endpoint}"]
-      kwargs = {
-        :headers => { 'Api-Appid' => @configuration.api_id, 'Api-Key' => @configuration.api_key },
-        data_param => data
-      }
+  def self.request_with_authentication method, endpoint:, data: nil
+    data_param = method.eql?(:get) ? :query : :body
+    request_content = data_param.eql?(:body) ? data.to_json : data
 
-      response = HTTParty.send *args, **kwargs
+    args = [method, "#{BASE_URL}#{API_VERSION}#{endpoint}"]
+    kwargs = {
+      :headers => { 'Api-Appid' => @configuration.api_id,
+                    'Api-Key' => @configuration.api_key,
+                    'Content-Type' => 'application/json' },
+      data_param => request_content
+    }
 
-      unless response.code.eql? 200
-        error = "#{response.code} #{response.msg}"
-        raise APIError.new(response.body.present? ? "#{error} - #{response.body}" : error)
-      end
+    response = HTTParty.send *args, **kwargs
 
-      parsed_response = response.parsed_response
-
-      @configuration.debug_mode ? parsed_response.update(original_request: response.request) : nil
-
-      Response.new **parsed_response.symbolize_keys
+    unless response.code.eql? 200
+      error = "#{response.code} #{response.msg}"
+      raise APIError.new(response.body.present? ? "#{error} - #{response.body}" : error)
     end
 
-    def self.objects_call method, object_type, endpoint:, data: {}
-      metadata = describe object_type
-      data.update 'objectID' => metadata['schema_object_id']
+    parsed_response = response.parsed_response
 
-      request_with_authentication method, endpoint: endpoint, data: data
-    end
+    @configuration.debug_mode ? parsed_response.update(original_request: response.request) : nil
 
-    def self.objects_meta
-      @objects_meta_cache ||= request_with_authentication :get, endpoint: '/objects/meta'
-    end
+    Response.new **parsed_response.symbolize_keys
+  end
+
+  def self.objects_call method, object_type, endpoint:, data: {}
+    metadata = describe object_type
+    data.update 'objectID' => metadata['schema_object_id']
+
+    request_with_authentication method, endpoint: endpoint, data: data
+  end
+
+  def self.objects_meta
+    @objects_meta_cache ||= request_with_authentication :get, endpoint: '/objects/meta'
+  end
 end
