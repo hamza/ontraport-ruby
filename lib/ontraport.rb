@@ -153,6 +153,54 @@ module Ontraport
     objects_call :delete, object_type, endpoint: '/objects/tag', data: params
   end
 
+  # Add a subscription to an object.
+  #
+  # @example
+  #   Ontraport.add_subscription :contact, 12345, [150,200], "Campaign", { range: 5 }
+  #   #=> #<Ontraport::Response @data=...>
+  #
+  # @see https://api.ontraport.com/live/#!/objects/addSubscription API docs
+  #
+  # @param object_type [Symbol] the type of object
+  # @param ids [Array, Integer] id or array of ids of objects to subscribe
+  # @param add_list [Array, Integer] id or array of ids of Campaigns or Sequences to subscribe the object to
+  # @param sub_type [String, nil] possible values are "Sequence" or "Campaign" defaults to "Campaign"
+  # @param params [Hash, nil] extra stuff to add to request data. Use +.describe+ to get a list of available fields.
+  # @return [Response]
+
+  def self.add_subscription object_type, ids, add_list, sub_type = 'Campaign', params = {}
+    objects_call :put, object_type, endpoint: '/objects/subscribe',
+                                    data: params.update(
+                                      ids: Array(ids).join(','),
+                                      sub_type: sub_type,
+                                      add_list: Array(add_list).join(',')
+                                    )
+  end
+
+  # Remove a subscription from an object.
+  #
+  # @example
+  #   Ontraport.remove_subscription :contact, 12345, [150,200], "Campaign", { range: 5 }
+  #   #=> #<Ontraport::Response @data=...>
+  #
+  # @see https://api.ontraport.com/live/#!/objects/addSubscription API docs
+  #
+  # @param object_type [Symbol] the type of object
+  # @param ids [Array, Integer] id or array of ids of objects to subscribe
+  # @param remove_list [Array, Integer] id or array of ids of Campaigns or Sequences to unsubscribe the object to
+  # @param sub_type [String, nil] possible values are "Sequence" or "Campaign" defaults to "Campaign"
+  # @param params [Hash, nil] extra stuff to add to request data. Use +.describe+ to get a list of available fields.
+  # @return [Response]
+
+  def self.remove_subscription object_type, ids, remove_list, sub_type = 'Campaign', params = {}
+    objects_call :delete, object_type, endpoint: '/objects/subscribe',
+                                       data: params.update(
+                                         ids: Array(ids).join(','),
+                                         sub_type: sub_type,
+                                         remove_list: Array(remove_list).join(',')
+                                       )
+  end
+
   # @!endgroup
   # @!group "Transactions" Methods
 
@@ -167,35 +215,44 @@ module Ontraport
   end
 
   # @!endgroup
+  #
 
   private
-    def self.request_with_authentication method, endpoint:, data: nil
-      data_param = method.eql?(:get) ? :query : :body
 
-      args = [method, "#{BASE_URL}#{API_VERSION}#{endpoint}"]
-      kwargs = {
-        :headers => { 'Api-Appid' => @configuration.api_id, 'Api-Key' => @configuration.api_key },
-        data_param => data
-      }
+  def self.request_with_authentication method, endpoint:, data: nil
+    data_param = method.eql?(:get) ? :query : :body
+    request_content = data_param.eql?(:body) ? data.to_json : data
 
-      response = HTTParty.send *args, **kwargs
+    args = [method, "#{BASE_URL}#{API_VERSION}#{endpoint}"]
+    kwargs = {
+      :headers => { 'Api-Appid' => @configuration.api_id,
+                    'Api-Key' => @configuration.api_key,
+                    'Content-Type' => 'application/json' },
+      data_param => request_content
+    }
 
-      unless response.code.eql? 200
-        error = "#{response.code} #{response.msg}"
-        raise APIError.new(response.body.present? ? "#{error} - #{response.body}" : error)
-      end
+    response = HTTParty.send *args, **kwargs
 
-      Response.new **response.parsed_response.symbolize_keys
+    unless response.code.eql? 200
+      error = "#{response.code} #{response.msg}"
+      raise APIError.new(response.body.present? ? "#{error} - #{response.body}" : error)
     end
 
-    def self.objects_call method, object_type, endpoint:, data: {}
-      metadata = describe object_type
-      data.update 'objectID' => metadata['schema_object_id']
+    parsed_response = response.parsed_response
 
-      request_with_authentication method, endpoint: endpoint, data: data
-    end
+    @configuration.debug_mode ? parsed_response.update(original_request: response.request) : nil
 
-    def self.objects_meta
-      @objects_meta_cache ||= request_with_authentication :get, endpoint: '/objects/meta'
-    end
+    Response.new **parsed_response.symbolize_keys
+  end
+
+  def self.objects_call method, object_type, endpoint:, data: {}
+    metadata = describe object_type
+    data.update 'objectID' => metadata['schema_object_id']
+
+    request_with_authentication method, endpoint: endpoint, data: data
+  end
+
+  def self.objects_meta
+    @objects_meta_cache ||= request_with_authentication :get, endpoint: '/objects/meta'
+  end
 end

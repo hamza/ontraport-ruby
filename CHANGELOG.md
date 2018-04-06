@@ -1,5 +1,9 @@
 # Unreleased
 
+- Added new method `add_subscription` for objects
+- Added new configuration option `debug_mode` 
+    adds value `original_request` to response data
+
 # 0.1.21 - September 6, 2017
 
 - require HTTParty in main module (fixes #1)
